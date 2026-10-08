@@ -1,78 +1,88 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-const API_URL =
- import.meta.env.VITE_API_URL || "https://mern-zeta-jade.vercel.app/students";
 function App() {
+ const [students, setStudents] = useState([]);
  const [name, setName] = useState("");
  const [course, setCourse] = useState("");
  const [age, setAge] = useState("");
- const [students, setStudents] = useState([]);
- const [editingId, setEditingId] = useState(null);
- const getStudents = async () => {
-   const response = await axios.get(API_URL);
-   setStudents(response.data);
- };
+ const [Id, setId] = useState(null);
  useEffect(() => {
-   getStudents();
+   axios.get("/api/students").then((response) => {
+     setStudents(response.data);
+   });
  }, []);
- const saveStudent = async () => {
-   if (editingId) {
-     await axios.put(`${API_URL}/${editingId}`, {
-       name,
-       course,
-       age,
+ function getStudents() {
+   axios.get("/api/students").then((response) => {
+     setStudents(response.data);
+   });
+ }
+ function addStudent() {
+   axios
+     .post("/api/students", {
+       name: name,
+       course: course,
+       age: age,
+     })
+     .then(() => {
+       setName("");
+       setCourse("");
+       setAge("");
+       getStudents();
      });
-     setEditingId(null);
-   } else {
-     await axios.post(API_URL, {
-       name,
-       course,
-       age,
-     });
-   }
-   setName("");
-   setCourse("");
-   setAge("");
-   getStudents();
- };
- const editStudent = (student) => {
+ }
+ function editStudent(student) {
    setName(student.name);
    setCourse(student.course);
    setAge(student.age);
-   setEditingId(student._id);
- };
- const deleteStudent = async (id) => {
-   await axios.delete(`${API_URL}/${id}`);
-   getStudents();
- };
+   setId(student._id);
+ }
+ function updateStudent() {
+   axios
+     .put("/api/students/" + Id, {
+       name: name,
+       course: course,
+       age: age,
+     })
+     .then(() => {
+       setName("");
+       setCourse("");
+       setAge("");
+       setId(null);
+       getStudents();
+     });
+ }
+ function deleteStudent(id) {
+   axios.delete("/api/students/" + id).then(() => {
+     getStudents();
+   });
+ }
  return (
 <div>
 <h1>Student Management System</h1>
-<h2>{editingId ? "Edit Student" : "Add Student"}</h2>
 <input
+       type="text"
        placeholder="Name"
        value={name}
-       onChange={(e) => setName(e.target.value)}
+       onChange={(event) => setName(event.target.value)}
      />
-<br />
-<br />
+<br></br>
 <input
+       type="text"
        placeholder="Course"
        value={course}
-       onChange={(e) => setCourse(e.target.value)}
+       onChange={(event) => setCourse(event.target.value)}
      />
-<br />
-<br />
+<br></br>
 <input
+       type="number"
        placeholder="Age"
        value={age}
-       onChange={(e) => setAge(e.target.value)}
+       onChange={(event) => setAge(event.target.value)}
      />
-<br />
-<br />
-<button onClick={saveStudent}>
-       {editingId ? "Update Student" : "Add Student"}
-</button>
+<br></br>
+<button onClick={addStudent}>Add Student</button>
+<br></br>
+<button onClick={updateStudent}>Update Student</button>
 <h2>Students</h2>
      {students.map((student) => (
 <div key={student._id}>
@@ -85,7 +95,6 @@ function App() {
 <button onClick={() => deleteStudent(student._id)}>
            Delete
 </button>
-<hr />
 </div>
      ))}
 </div>
