@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 const API_URL =
- import.meta.env.VITE_API_URL || "http://localhost:5000/students";
+ import.meta.env.VITE_API_URL || "https://mern-zeta-jade.vercel.app/students";
 function App() {
  const [name, setName] = useState("");
  const [course, setCourse] = useState("");
